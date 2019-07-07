@@ -75,24 +75,6 @@ export default class App extends React.Component {
   };
 
   toggleComplete = id => {
-    this.setState({ prompt: 'Hiwowowowow'})
-    Alert.alert(
-      "Alert Title",
-      "My Alert Msg",
-      [
-        {
-          text: "Ask me later",
-          onPress: () => console.log("Ask me later pressed")
-        },
-        {
-          text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel"
-        },
-        { text: "OK", onPress: () => console.log("OK   Pressed") }
-      ],
-      { cancelable: false }
-    );
     const todo = this.state.todos.find(todo => todo.id === id);
     todo.status = todo === "Active" ? "Done" : "Active";
 
@@ -120,8 +102,8 @@ export default class App extends React.Component {
       >
         <View style={styles.container}>
           <Text style={styles.header}>
-            {/* Todo List ({this.state.todos.length}) */}
-            {this.state.prompt}
+            Todo List ({this.state.todos.length})
+            {/* {this.state.prompt} */}
           </Text>
           <TextInput
             style={styles.input}
