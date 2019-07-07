@@ -1,4 +1,4 @@
-package com.invertase.rnfirebasestarter;
+package com.stageinc.rntodolist;
 
 import android.support.multidex.MultiDexApplication;
 

@@ -1,101 +1,203 @@
-import React from 'react';
-import { StyleSheet, Platform, Image, Text, View, ScrollView } from 'react-native';
+import React from "react";
+import {
+  Text,
+  View,
+  FlatList,
+  TextInput,
+  StyleSheet,
+  ImageBackground,
+  TouchableOpacity,
+} from "react-native";
 
-import firebase from 'react-native-firebase';
+import firebase from "react-native-firebase";
+import Todo from "./src/components/Todo"; // we'll create this next
 
 export default class App extends React.Component {
-  constructor() {
-    super();
-    this.state = {};
+  constructor(props) {
+    super(props);
+    this.state = {
+      todos: [],
+      textInput: "",
+      loading: true
+    };
+
+    this.ref = firebase.firestore().collection("todos");
+    this.unsubscribe = null;
+
+    // const query = this.ref
+    //   .where("uid", "==", "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1")
+    //   .orderBy("createdAt", "asc");
+
+    // const todos = [];
+
+    // query
+    //   .get()
+    //   .then(querySnapshot => {
+    //     querySnapshot.forEach(doc => {
+    //       const todo = {
+    //         ...doc.data(),
+    //         id: doc.id
+    //       };
+    //       todos.push(todo);
+    //     });
+    //     this.setState({ todos });
+    //   })
+    //   .catch(error => {
+    //     console.log("Error getting document:", error);
+    // });
+    
+    this.ref
+      .get()
+      .then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          const todo = {
+            ...doc.data(),
+            id: doc.id
+          };
+          todos.push(todo);
+        });
+        save(todos);
+      })
+      .catch(error => {
+        console.log("Error getting document:", error);
+      });
   }
 
-  async componentDidMount() {
-    // TODO: You: Do firebase things
-    // const { user } = await firebase.auth().signInAnonymously();
-    // console.warn('User -> ', user.toJSON());
-
-    // await firebase.analytics().logEvent('foo', { bar: '123'});
+  componentDidMount() {
+    this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
   }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
+  addTodo = () => {
+    this.ref.add({
+      status: "Active",
+      createdAt: new Date(),
+      body: this.state.textInput,
+      uid: "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1",
+    });
+
+    this.setState({
+      textInput: ""
+    });
+  }
+
+  updateTextInput(value) {
+    this.setState({ textInput: value });
+  }
+
+  onCollectionUpdate = (querySnapshot) => {
+    let todos = [];
+    querySnapshot.forEach(doc => {
+      const { uid, body, status, createdAt } = doc.data();
+      if (uid === "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1") {
+        todos.push({
+          doc,
+          uid,
+          body,
+          status,
+          createdAt,
+          id: doc.id
+        });
+      }
+    });
+
+    todos = todos.sort((a, b) => {
+      return new Date(b.date) - new Date(a.date);
+    });
+
+    this.setState({
+      todos,
+      loading: false
+    });
+  };
 
   render() {
+    if (this.state.loading) {
+      return null;
+    }
+
     return (
-      <ScrollView>
+      <ImageBackground
+        style={styles.bg}
+        source={{
+          uri:
+            "https://images.unsplash.com/photo-1537241969145-07fd0fa8083b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80"
+        }}
+      >
         <View style={styles.container}>
-          <Image source={require('./assets/ReactNativeFirebase.png')} style={[styles.logo]}/>
-          <Text style={styles.welcome}>
-            Welcome to {'\n'} React Native Firebase
+          <Text style={styles.header}>
+            Todo List ({this.state.todos.length})
           </Text>
-          <Text style={styles.instructions}>
-            To get started, edit App.js
-          </Text>
-          {Platform.OS === 'ios' ? (
-            <Text style={styles.instructions}>
-              Press Cmd+R to reload,{'\n'}
-              Cmd+D or shake for dev menu
-            </Text>
-          ) : (
-            <Text style={styles.instructions}>
-              Double tap R on your keyboard to reload,{'\n'}
-              Cmd+M or shake for dev menu
-            </Text>
-          )}
-          <View style={styles.modules}>
-            <Text style={styles.modulesHeader}>The following Firebase modules are pre-installed:</Text>
-            {firebase.admob.nativeModuleExists && <Text style={styles.module}>admob()</Text>}
-            {firebase.analytics.nativeModuleExists && <Text style={styles.module}>analytics()</Text>}
-            {firebase.auth.nativeModuleExists && <Text style={styles.module}>auth()</Text>}
-            {firebase.config.nativeModuleExists && <Text style={styles.module}>config()</Text>}
-            {firebase.crashlytics.nativeModuleExists && <Text style={styles.module}>crashlytics()</Text>}
-            {firebase.database.nativeModuleExists && <Text style={styles.module}>database()</Text>}
-            {firebase.firestore.nativeModuleExists && <Text style={styles.module}>firestore()</Text>}
-            {firebase.functions.nativeModuleExists && <Text style={styles.module}>functions()</Text>}
-            {firebase.iid.nativeModuleExists && <Text style={styles.module}>iid()</Text>}
-            {firebase.links.nativeModuleExists && <Text style={styles.module}>links()</Text>}
-            {firebase.messaging.nativeModuleExists && <Text style={styles.module}>messaging()</Text>}
-            {firebase.notifications.nativeModuleExists && <Text style={styles.module}>notifications()</Text>}
-            {firebase.perf.nativeModuleExists && <Text style={styles.module}>perf()</Text>}
-            {firebase.storage.nativeModuleExists && <Text style={styles.module}>storage()</Text>}
-          </View>
+          <TextInput
+            style={styles.input}
+            placeholder={"Add Todo"}
+            value={this.state.textInput}
+            onChangeText={text => this.updateTextInput(text)}
+          />
+          <TouchableOpacity
+            style={styles.submit}
+            onPress={this.addTodo}
+            disabled={!this.state.textInput.length}
+          >
+            <Text style={styles.buttonText}>Submit</Text>
+          </TouchableOpacity>
+          <FlatList
+            style={styles.list}
+            data={this.state.todos}
+            keyExtractor={item => item.id}
+            renderItem={({ item }) => <Todo {...item} />}
+          />
         </View>
-      </ScrollView>
+      </ImageBackground>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  bg: {
+    width: "100%",
+    height: "100%"
+  },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    alignItems: "center",
+    justifyContent: "center"
   },
-  logo: {
-    height: 120,
-    marginBottom: 16,
-    marginTop: 64,
+  header: {
+    fontSize: 50,
+    marginTop: 50,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  input: {
     padding: 10,
-    width: 135,
+    width: "90%",
+    fontSize: 30,
+    color: "white",
+    fontWeight: "bold",
+    backgroundColor: "rgba(52, 52, 52, 0.8)"
   },
-  welcome: {
+  submit: {
+    width: '30%',
+    height: '05%',
+    marginTop: 10,
+    borderRadius: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+    backgroundColor: 'red',
+    justifyContent: 'center',
+    backgroundColor: '#DB504A'
+  },
+  buttonText: {
     fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
+    color: 'white',
+    fontWeight: 'bold',
   },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-  modules: {
-    margin: 20,
-  },
-  modulesHeader: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  module: {
-    fontSize: 14,
-    marginTop: 4,
-    textAlign: 'center',
+  list: {
+    width: "90%",
+    height: "90%",
   }
 });
