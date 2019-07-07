@@ -64,7 +64,7 @@ export default class App extends React.Component {
     });
     todos = todos.sort((a, b) => {
       return (
-        new Date(b.createdAt.nanoseconds) - new Date(a.createdAt.nanoseconds)
+        new Date(a.createdAt) - new Date(b.createdAt)
       );
     });
 
@@ -82,10 +82,10 @@ export default class App extends React.Component {
       .doc(id)
       .set(todo)
       .then(function() {
-        this.setState({ prompt: "Document successfully written!" })
+        this.setState({ prompt: "Document successfully written!" });
       })
       .catch(function(error) {
-        this.setState({ prompt: "Error writing document: ", error })
+        this.setState({ prompt: "Error writing document: ", error });
       });
   };
 
@@ -102,8 +102,7 @@ export default class App extends React.Component {
       >
         <View style={styles.container}>
           <Text style={styles.header}>
-            Todo List ({this.state.todos.length})
-            {/* {this.state.prompt} */}
+            Todo List ({this.state.todos.length}){/* {this.state.prompt} */}
           </Text>
           <TextInput
             style={styles.input}
