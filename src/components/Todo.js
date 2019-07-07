@@ -1,21 +1,14 @@
 import React from "react";
-import { 
-  View, 
-  Text,
-  StyleSheet,
-  TouchableHighlight, 
-} from "react-native";
+import { View, Text, StyleSheet, TouchableHighlight } from "react-native";
 
 export default class Todo extends React.PureComponent {
-  toggleComplete() {
-    this.props.doc.ref.update({
-      status: !this.props.status
-    });
-  }
-
   render() {
     const isDone = this.props.status === "Done";
-    const bgStyle = isDone ? "#12355B" : "green"
+    const bgStyle = isDone ? "#12355B" : "green";
+    toggleComplete = () => {
+      this.props.toggleComplete(this.props.id)
+    }
+
     return (
       <TouchableHighlight
         onPress={this.toggleComplete}
@@ -24,13 +17,23 @@ export default class Todo extends React.PureComponent {
         <View style={styles.container}>
           <View style={{ flex: 2 }}>
             <Text
-              style={[styles.text, { textDecorationLine: isDone ? "line-through" : "none" } ]}
+              style={[
+                styles.text,
+                { textDecorationLine: isDone ? "line-through" : "none" }
+              ]}
             >
               {this.props.body}
             </Text>
           </View>
           <View style={{ flex: 0.1 }}>
-            <Text style={{ color: 'white', textDecorationLine: isDone ? "line-through" : null }}>X</Text>
+            <Text
+              style={{
+                color: "white",
+                textDecorationLine: isDone ? "line-through" : null
+              }}
+            >
+              X
+            </Text>
           </View>
         </View>
       </TouchableHighlight>
@@ -49,12 +52,12 @@ const styles = StyleSheet.create({
     padding: 10,
     margin: 10,
     alignItems: "center",
-    flexDirection: "row",
+    flexDirection: "row"
   },
   text: {
     fontSize: 20,
     marginLeft: 10,
     color: "white",
-    fontWeight: "bold",
+    fontWeight: "bold"
   }
 });

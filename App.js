@@ -1,16 +1,17 @@
 import React from "react";
 import {
   Text,
+  Alert,
   View,
   FlatList,
   TextInput,
   StyleSheet,
   ImageBackground,
-  TouchableOpacity,
+  TouchableOpacity
 } from "react-native";
 
 import firebase from "react-native-firebase";
-import Todo from "./src/components/Todo"; // we'll create this next
+import Todo from "./src/components/Todo";
 
 export default class App extends React.Component {
   constructor(props) {
@@ -23,44 +24,6 @@ export default class App extends React.Component {
 
     this.ref = firebase.firestore().collection("todos");
     this.unsubscribe = null;
-
-    // const query = this.ref
-    //   .where("uid", "==", "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1")
-    //   .orderBy("createdAt", "asc");
-
-    // const todos = [];
-
-    // query
-    //   .get()
-    //   .then(querySnapshot => {
-    //     querySnapshot.forEach(doc => {
-    //       const todo = {
-    //         ...doc.data(),
-    //         id: doc.id
-    //       };
-    //       todos.push(todo);
-    //     });
-    //     this.setState({ todos });
-    //   })
-    //   .catch(error => {
-    //     console.log("Error getting document:", error);
-    // });
-    
-    this.ref
-      .get()
-      .then(querySnapshot => {
-        querySnapshot.forEach(doc => {
-          const todo = {
-            ...doc.data(),
-            id: doc.id
-          };
-          todos.push(todo);
-        });
-        save(todos);
-      })
-      .catch(error => {
-        console.log("Error getting document:", error);
-      });
   }
 
   componentDidMount() {
@@ -76,36 +39,33 @@ export default class App extends React.Component {
       status: "Active",
       createdAt: new Date(),
       body: this.state.textInput,
-      uid: "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1",
+      uid: "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1"
     });
 
     this.setState({
       textInput: ""
     });
-  }
+  };
 
   updateTextInput(value) {
     this.setState({ textInput: value });
   }
 
-  onCollectionUpdate = (querySnapshot) => {
+  onCollectionUpdate = querySnapshot => {
     let todos = [];
     querySnapshot.forEach(doc => {
-      const { uid, body, status, createdAt } = doc.data();
+      const { uid } = doc.data();
       if (uid === "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1") {
         todos.push({
-          doc,
-          uid,
-          body,
-          status,
-          createdAt,
-          id: doc.id
+          id: doc.id,
+          ...doc.data()
         });
       }
     });
-
     todos = todos.sort((a, b) => {
-      return new Date(b.date) - new Date(a.date);
+      return (
+        new Date(b.createdAt.nanoseconds) - new Date(a.createdAt.nanoseconds)
+      );
     });
 
     this.setState({
@@ -114,10 +74,41 @@ export default class App extends React.Component {
     });
   };
 
+  toggleComplete = id => {
+    this.setState({ prompt: 'Hiwowowowow'})
+    Alert.alert(
+      "Alert Title",
+      "My Alert Msg",
+      [
+        {
+          text: "Ask me later",
+          onPress: () => console.log("Ask me later pressed")
+        },
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        { text: "OK", onPress: () => console.log("OK   Pressed") }
+      ],
+      { cancelable: false }
+    );
+    const todo = this.state.todos.find(todo => todo.id === id);
+    todo.status = todo === "Active" ? "Done" : "Active";
+
+    this.ref
+      .doc(id)
+      .set(todo)
+      .then(function() {
+        this.setState({ prompt: "Document successfully written!" })
+      })
+      .catch(function(error) {
+        this.setState({ prompt: "Error writing document: ", error })
+      });
+  };
+
   render() {
-    if (this.state.loading) {
-      return null;
-    }
+    if (this.state.loading) return null;
 
     return (
       <ImageBackground
@@ -129,7 +120,8 @@ export default class App extends React.Component {
       >
         <View style={styles.container}>
           <Text style={styles.header}>
-            Todo List ({this.state.todos.length})
+            {/* Todo List ({this.state.todos.length}) */}
+            {this.state.prompt}
           </Text>
           <TextInput
             style={styles.input}
@@ -148,7 +140,9 @@ export default class App extends React.Component {
             style={styles.list}
             data={this.state.todos}
             keyExtractor={item => item.id}
-            renderItem={({ item }) => <Todo {...item} />}
+            renderItem={({ item }) => (
+              <Todo {...item} toggleComplete={this.toggleComplete} />
+            )}
           />
         </View>
       </ImageBackground>
@@ -163,14 +157,17 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    width: "95%",
+    alignSelf: "center",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+    backgroundColor: "rgba(52, 52, 52, 0.9)"
   },
   header: {
     fontSize: 50,
     marginTop: 50,
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold"
   },
   input: {
     padding: 10,
@@ -178,26 +175,26 @@ const styles = StyleSheet.create({
     fontSize: 30,
     color: "white",
     fontWeight: "bold",
-    backgroundColor: "rgba(52, 52, 52, 0.8)"
+    backgroundColor: "rgba(255, 255, 255, 0.5)"
   },
   submit: {
-    width: '30%',
-    height: '05%',
+    width: "30%",
+    height: "05%",
     marginTop: 10,
     borderRadius: 10,
     marginBottom: 10,
-    alignItems: 'center',
-    backgroundColor: 'red',
-    justifyContent: 'center',
-    backgroundColor: '#DB504A'
+    alignItems: "center",
+    backgroundColor: "red",
+    justifyContent: "center",
+    backgroundColor: "#DB504A"
   },
   buttonText: {
     fontSize: 20,
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold"
   },
   list: {
     width: "90%",
-    height: "90%",
+    height: "90%"
   }
 });
