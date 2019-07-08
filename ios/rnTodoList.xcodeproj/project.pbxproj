@@ -45,7 +45,7 @@
 		ED297163215061F000B7C4FE /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED297162215061F000B7C4FE /* JavaScriptCore.framework */; };
 		ED2971652150620600B7C4FE /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED2971642150620600B7C4FE /* JavaScriptCore.framework */; };
 		FD1E3C7C22D30B8700199175 /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 008F07F21AC5B25A0029DE68 /* main.jsbundle */; };
-		FD5F681222D1D53300B7F01E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FD5F681122D1D53300B7F01E /* GoogleService-Info.plist */; };
+		FD1E3C7E22D3135A00199175 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FD1E3C7D22D3135A00199175 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -371,7 +371,7 @@
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
 		F2C89EE2F4607D097253AE26 /* Pods-rnTodoList-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-rnTodoList-tvOSTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-rnTodoList-tvOSTests/Pods-rnTodoList-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
-		FD5F681122D1D53300B7F01E /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		FD1E3C7D22D3135A00199175 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -532,7 +532,7 @@
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
-				FD5F681122D1D53300B7F01E /* GoogleService-Info.plist */,
+				FD1E3C7D22D3135A00199175 /* GoogleService-Info.plist */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB11A68108700A75B9A /* LaunchScreen.xib */,
@@ -1139,9 +1139,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				FD1E3C7C22D30B8700199175 /* main.jsbundle in Resources */,
+				FD1E3C7E22D3135A00199175 /* GoogleService-Info.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
-				FD5F681222D1D53300B7F01E /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1414,7 +1414,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.getonstageapp.todo.ios;
+				PRODUCT_BUNDLE_IDENTIFIER = com.getonstageapp.todos;
 				PRODUCT_NAME = rnTodoList;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -1438,7 +1438,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.getonstageapp.todo.ios;
+				PRODUCT_BUNDLE_IDENTIFIER = com.getonstageapp.todos;
 				PRODUCT_NAME = rnTodoList;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
