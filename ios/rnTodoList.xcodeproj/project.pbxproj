@@ -44,6 +44,7 @@
 		ADDA258B0C3DE0261C60A364 /* libPods-rnTodoList-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11B23455DE3C4D5673E7318E /* libPods-rnTodoList-tvOSTests.a */; };
 		ED297163215061F000B7C4FE /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED297162215061F000B7C4FE /* JavaScriptCore.framework */; };
 		ED2971652150620600B7C4FE /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED2971642150620600B7C4FE /* JavaScriptCore.framework */; };
+		FD1E3C7C22D30B8700199175 /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 008F07F21AC5B25A0029DE68 /* main.jsbundle */; };
 		FD5F681222D1D53300B7F01E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FD5F681122D1D53300B7F01E /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
@@ -1137,6 +1138,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FD1E3C7C22D30B8700199175 /* main.jsbundle in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 				FD5F681222D1D53300B7F01E /* GoogleService-Info.plist in Resources */,
@@ -1173,7 +1175,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh";
+			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh ./ios/main.jsbundle\n";
 		};
 		2D02E4CB1E0B4B27006451C7 /* Bundle React Native Code And Images */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1412,7 +1414,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = todo.getonstageapp.com;
+				PRODUCT_BUNDLE_IDENTIFIER = com.getonstageapp.todo.ios;
 				PRODUCT_NAME = rnTodoList;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -1436,7 +1438,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = todo.getonstageapp.com;
+				PRODUCT_BUNDLE_IDENTIFIER = com.getonstageapp.todo.ios;
 				PRODUCT_NAME = rnTodoList;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
