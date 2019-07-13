@@ -2,12 +2,12 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableHighlight } from "react-native";
 
 export default class Todo extends React.PureComponent {
+  toggleComplete = () => {
+    this.props.toggleComplete(this.props.id)
+  }
   render() {
     const isDone = this.props.status === "Done";
     const bgStyle = isDone ? "#12355B" : "green";
-    toggleComplete = () => {
-      this.props.toggleComplete(this.props.id)
-    }
 
     return (
       <TouchableHighlight
@@ -22,7 +22,7 @@ export default class Todo extends React.PureComponent {
                 { textDecorationLine: isDone ? "line-through" : "none" }
               ]}
             >
-              {this.props.body}
+              {this.props.index + 1}: {this.props.body}
             </Text>
           </View>
           <View style={{ flex: 0.1 }}>

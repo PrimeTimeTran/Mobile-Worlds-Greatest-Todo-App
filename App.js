@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
-  Alert,
   View,
   FlatList,
   TextInput,
@@ -11,125 +10,120 @@ import {
 } from "react-native";
 
 import firebase from "react-native-firebase";
+
+
 import Todo from "./src/components/Todo";
 
-export default class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      todos: [],
-      textInput: "",
-      loading: true
-    };
+function App() {
+  const [todos, setTodos] = useState([]);
+  const [todoBody, setTodoBody] = useState("");
 
-    this.ref = firebase.firestore().collection("todos");
-    this.unsubscribe = null;
-  }
+  useEffect(() => {
+    // async function loadProducts() {
+    //   console.log("loadProducts");
+    //   try {
+    //     // Create or sign the user into a anonymous account
+    //     await firebase.auth().signInAnonymously();
+    //     // call our named products endpoint
+    //     const { data } = await firebase.functions().httpsCallable("products")({
+    //       page: 1,
+    //       limit: 15
+    //     });
 
-  componentDidMount() {
-    this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
-  }
+    //     // Update component state
+    //     setProducts(data);
+    //     setLoading(false);
+    //   } catch (e) {
+    //     console.error(e);
+    //   }
+    // }
 
-  componentWillUnmount() {
-    this.unsubscribe();
-  }
+    // loadProducts();
+    firebase
+      .firestore()
+      .collection("todos")
+      .get()
+      .then(querySnapshot => {
+        let newTodos = [];
+        querySnapshot.forEach(function(doc) {
+          const todo = {
+            ...doc.data(),
+            id: doc.id
+          };
+          newTodos.push(todo);
+        });
+        setTodos(newTodos);
+      });
+  });
 
-  addTodo = () => {
-    this.ref.add({
+  const addTodo = async () => {
+    const newTodo = {
       status: "Active",
       createdAt: new Date(),
-      body: this.state.textInput,
+      body: todoBody,
       uid: "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1"
-    });
+    };
 
-    this.setState({
-      textInput: ""
-    });
-  };
-
-  updateTextInput(value) {
-    this.setState({ textInput: value });
-  }
-
-  onCollectionUpdate = querySnapshot => {
-    let todos = [];
-    querySnapshot.forEach(doc => {
-      const { uid } = doc.data();
-      if (uid === "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1") {
-        todos.push({
-          id: doc.id,
-          ...doc.data()
-        });
-      }
-    });
-    todos = todos.sort((a, b) => {
-      return (
-        new Date(a.createdAt) - new Date(b.createdAt)
-      );
-    });
-
-    this.setState({
-      todos,
-      loading: false
-    });
+    firebase
+      .firestore()
+      .collection("todos")
+      .doc()
+      .set(newTodo);
+    setTodoBody("");
   };
 
   toggleComplete = id => {
-    const todo = this.state.todos.find(todo => todo.id === id);
-    todo.status = todo === "Active" ? "Done" : "Active";
-
-    this.ref
+    const todo = todos.find(todo => todo.id === id);
+    todo.status = todo.status === "Active" ? "Done" : "Active";
+    const todosRef = firebase.firestore().collection("todos");
+    todosRef
       .doc(id)
       .set(todo)
-      .then(function() {
-        this.setState({ prompt: "Document successfully written!" });
+      .then(() => {
+        console.log("success");
       })
-      .catch(function(error) {
-        this.setState({ prompt: "Error writing document: ", error });
+      .catch(error => {
+        console.log("failure");
       });
   };
 
-  render() {
-    if (this.state.loading) return null;
-
-    return (
-      <ImageBackground
-        style={styles.bg}
-        source={{
-          uri:
-            "https://images.unsplash.com/photo-1537241969145-07fd0fa8083b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80"
-        }}
-      >
-        <View style={styles.container}>
-          <Text style={styles.header}>
-            Todo List ({this.state.todos.length}){/* {this.state.prompt} */}
-          </Text>
-          <TextInput
-            style={styles.input}
-            placeholder={"Add Todo"}
-            value={this.state.textInput}
-            onChangeText={text => this.updateTextInput(text)}
-          />
-          <TouchableOpacity
-            style={styles.submit}
-            onPress={this.addTodo}
-            disabled={!this.state.textInput.length}
-          >
-            <Text style={styles.buttonText}>Submit</Text>
-          </TouchableOpacity>
-          <FlatList
-            style={styles.list}
-            data={this.state.todos}
-            keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-              <Todo {...item} toggleComplete={this.toggleComplete} />
-            )}
-          />
-        </View>
-      </ImageBackground>
-    );
-  }
+  return (
+    <ImageBackground
+      style={styles.bg}
+      source={{
+        uri:
+          "https://images.unsplash.com/photo-1537241969145-07fd0fa8083b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80"
+      }}
+    >
+      <View style={styles.container}>
+        <Text style={styles.header}>Todo List ({todos.length})</Text>
+        <TextInput
+          value={todoBody}
+          style={styles.input}
+          placeholder={"Add Todo"}
+          onChangeText={text => setTodoBody(text)}
+        />
+        <TouchableOpacity
+          onPress={addTodo}
+          style={styles.submit}
+          disabled={!todoBody.length}
+        >
+          <Text style={styles.buttonText}>Submit</Text>
+        </TouchableOpacity>
+        <FlatList
+          data={todos}
+          style={styles.list}
+          keyExtractor={item => item.id}
+          renderItem={({ item, index }) => (
+            <Todo {...item} toggleComplete={toggleComplete} index={index} />
+          )}
+        />
+      </View>
+    </ImageBackground>
+  );
 }
+
+export default App;
 
 const styles = StyleSheet.create({
   bg: {
