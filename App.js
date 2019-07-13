@@ -19,26 +19,6 @@ function App() {
   const [todoBody, setTodoBody] = useState("");
 
   useEffect(() => {
-    // async function loadProducts() {
-    //   console.log("loadProducts");
-    //   try {
-    //     // Create or sign the user into a anonymous account
-    //     await firebase.auth().signInAnonymously();
-    //     // call our named products endpoint
-    //     const { data } = await firebase.functions().httpsCallable("products")({
-    //       page: 1,
-    //       limit: 15
-    //     });
-
-    //     // Update component state
-    //     setProducts(data);
-    //     setLoading(false);
-    //   } catch (e) {
-    //     console.error(e);
-    //   }
-    // }
-
-    // loadProducts();
     firebase
       .firestore()
       .collection("todos")
