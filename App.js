@@ -2,15 +2,16 @@ import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
+  Keyboard,
   FlatList,
   TextInput,
   StyleSheet,
   ImageBackground,
-  TouchableOpacity
+  TouchableOpacity,
+  TouchableWithoutFeedback
 } from "react-native";
 
 import firebase from "react-native-firebase";
-
 
 import Todo from "./src/components/Todo";
 
@@ -19,9 +20,22 @@ function App() {
   const [todoBody, setTodoBody] = useState("");
 
   useEffect(() => {
-    firebase
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        console.log('user')
+      } else {
+        console.log('no user')
+      }
+    })
+    const todosRef = firebase
       .firestore()
       .collection("todos")
+
+    const query = todosRef
+            .where("uid", "==", "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1")
+            .orderBy("createdAt", "asc");
+    query
       .get()
       .then(querySnapshot => {
         let newTodos = [];
@@ -34,7 +48,7 @@ function App() {
         });
         setTodos(newTodos);
       });
-  });
+  }, [todoBody, todos]);
 
   const addTodo = async () => {
     const newTodo = {
@@ -50,6 +64,9 @@ function App() {
       .doc()
       .set(newTodo);
     setTodoBody("");
+
+    const newTodos = todos.push(newTodo)
+    setTodos(newTodos);
   };
 
   toggleComplete = id => {
@@ -75,6 +92,7 @@ function App() {
           "https://images.unsplash.com/photo-1537241969145-07fd0fa8083b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80"
       }}
     >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
         <Text style={styles.header}>Todo List ({todos.length})</Text>
         <TextInput
@@ -99,6 +117,7 @@ function App() {
           )}
         />
       </View>
+      </TouchableWithoutFeedback>
     </ImageBackground>
   );
 }
@@ -119,7 +138,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(52, 52, 52, 0.9)"
   },
   header: {
-    fontSize: 50,
+    fontSize: 25,
     marginTop: 50,
     color: "white",
     fontWeight: "bold"
@@ -127,7 +146,7 @@ const styles = StyleSheet.create({
   input: {
     padding: 10,
     width: "90%",
-    fontSize: 30,
+    fontSize: 22,
     color: "white",
     fontWeight: "bold",
     backgroundColor: "rgba(255, 255, 255, 0.5)"
