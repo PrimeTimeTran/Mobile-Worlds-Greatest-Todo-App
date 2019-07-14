@@ -3,7 +3,7 @@ import { Alert, View, Text, StyleSheet, TouchableHighlight } from "react-native"
 
 const Todo = ({ id, body, index, status, toggleComplete, onDeleteTodo }) => {
   const isDone = status === "Done";
-  const bgStyle = isDone ? "#12355B" : "green";
+  const bgStyle = isDone ? "rgba(31, 58, 147, 0.6)" : "rgba(30, 130, 76, 0.6)";
   const textStyle = { textDecorationLine: isDone ? "line-through" : null };
 
   onLongPress = (body, id) => {
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   bg: {
     marginTop: 5,
     marginBottom: 5,
-    backgroundColor: "rgba(52, 52, 52, 0.8)"
+    borderRadius: 10,
   },
   container: {
     flex: 1,
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     flex: 2 
   },
   text: {
-    fontSize: 20,
+    fontSize: 15,
     marginLeft: 10,
     color: "white",
     fontWeight: "bold"

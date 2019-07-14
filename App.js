@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Text,
   View,
@@ -14,74 +14,59 @@ import {
 import firebase from "react-native-firebase";
 
 import Todo from "./src/components/Todo";
+import { randomBackgroundImage } from "./src/utils";
 
 function App() {
   const [todos, setTodos] = useState([]);
   const [todoBody, setTodoBody] = useState("");
+  const ref = useRef(firebase.firestore().collection("todos"));
 
   useEffect(() => {
-    firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        console.log("user");
-      } else {
-        console.log("no user");
-      }
-    });
-    const todosRef = firebase.firestore().collection("todos");
-
-    const query = todosRef
-      .where("uid", "==", "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1")
-      .orderBy("createdAt", "asc");
-    query.get().then(querySnapshot => {
-      let newTodos = [];
-      querySnapshot.forEach(function(doc) {
-        const todo = {
-          ...doc.data(),
-          id: doc.id
-        };
-        newTodos.push(todo);
+    const onCollectionUpdate = () => {
+      const query = ref.current
+        .where("uid", "==", "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1")
+        .orderBy("createdAt", "asc");
+      query.get().then(querySnapshot => {
+        let newTodos = [];
+        querySnapshot.forEach(function(doc) {
+          const todo = {
+            ...doc.data(),
+            id: doc.id
+          };
+          newTodos.push(todo);
+        });
+        setTodos(newTodos);
       });
-      setTodos(newTodos);
-    });
-  }, [todoBody, todos]);
+    };
+    ref.current.onSnapshot(onCollectionUpdate);
+  }, [todoBody]);
 
-  const addTodo = async () => {
+  const addTodo = () => {
     const newTodo = {
+      body: todoBody,
       status: "Active",
       createdAt: new Date(),
-      body: todoBody,
       uid: "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1"
     };
 
-    firebase
-      .firestore()
-      .collection("todos")
-      .doc()
-      .set(newTodo);
-    setTodoBody("");
+    ref.current.add(newTodo).then(doc => {
+      newTodo.id = doc.id;
+    });
 
-    const newTodos = todos.push(newTodo);
-    setTodos(newTodos);
+    setTodoBody("");
+    Keyboard.dismiss;
   };
 
   onDeleteTodo = id => {
-    const db = firebase.firestore().collection("todos");
-    db.doc(id)
+    ref.current
+      .doc(id)
       .delete()
-      .then(() => {
-        const newTodoList = todos.filter(todo => todo.id !== id);
-        setTodos(newTodoList);
-      })
-      .catch(error => {
-        console.error("Error removing document: ", error);
-      });
   };
 
   toggleComplete = id => {
     const todo = todos.find(todo => todo.id === id);
     todo.status = todo.status === "Active" ? "Done" : "Active";
-    const todosRef = firebase.firestore().collection("todos");
-    todosRef
+    ref.current
       .doc(id)
       .set(todo)
       .then(() => {
@@ -95,10 +80,7 @@ function App() {
   return (
     <ImageBackground
       style={styles.bg}
-      source={{
-        uri:
-          "https://images.unsplash.com/photo-1537241969145-07fd0fa8083b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80"
-      }}
+      source={{ uri: randomBackgroundImage() }}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.container}>
@@ -106,7 +88,8 @@ function App() {
           <TextInput
             value={todoBody}
             style={styles.input}
-            placeholder={"Add Todo"}
+            placeholder="Add Todo"
+            placeholderTextColor="lightgrey"
             onChangeText={text => setTodoBody(text)}
           />
           <TouchableOpacity
@@ -121,7 +104,12 @@ function App() {
             style={styles.list}
             keyExtractor={item => item.id}
             renderItem={({ item, index }) => (
-              <Todo {...item} toggleComplete={toggleComplete} index={index} onDeleteTodo={onDeleteTodo} />
+              <Todo
+                {...item}
+                toggleComplete={toggleComplete}
+                index={index}
+                onDeleteTodo={onDeleteTodo}
+              />
             )}
           />
         </View>
@@ -134,16 +122,25 @@ export default App;
 
 const styles = StyleSheet.create({
   bg: {
+    flex: 1,
     width: "100%",
-    height: "100%"
+    height: "100%",
+    backgroundColor: "black"
   },
   container: {
     flex: 1,
     width: "95%",
+    borderWidth: 1,
+    borderRadius: 20,
+    marginTop: "40%",
+    maxHeight: "60%",
+    minHeight: "60%",
+    paddingBottom: 10,
     alignSelf: "center",
     alignItems: "center",
+    borderColor: "white",
     justifyContent: "center",
-    backgroundColor: "rgba(52, 52, 52, 0.9)"
+    backgroundColor: "rgba(52, 52, 52, 0.4)"
   },
   header: {
     fontSize: 25,
@@ -156,12 +153,15 @@ const styles = StyleSheet.create({
     width: "90%",
     fontSize: 22,
     color: "white",
+    borderWidth: 1,
+    borderRadius: 10,
     fontWeight: "bold",
-    backgroundColor: "rgba(255, 255, 255, 0.5)"
+    borderColor: "white"
   },
   submit: {
     width: "30%",
     height: "05%",
+    minHeight: 50,
     marginTop: 10,
     borderRadius: 10,
     marginBottom: 10,
