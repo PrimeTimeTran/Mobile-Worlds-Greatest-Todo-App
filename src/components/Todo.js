@@ -1,7 +1,13 @@
 import React from "react";
-import { Alert, View, Text, StyleSheet, TouchableHighlight } from "react-native";
+import {
+  Alert,
+  View,
+  Text,
+  StyleSheet,
+  TouchableHighlight
+} from "react-native";
 
-const Todo = ({ id, body, index, status, toggleComplete, onDeleteTodo }) => {
+const Todo = ({ id, body, index, status, onToggleTodo, onDeleteTodo }) => {
   const isDone = status === "Done";
   const bgStyle = isDone ? "rgba(31, 58, 147, 0.6)" : "rgba(30, 130, 76, 0.6)";
   const textStyle = { textDecorationLine: isDone ? "line-through" : null };
@@ -21,13 +27,12 @@ const Todo = ({ id, body, index, status, toggleComplete, onDeleteTodo }) => {
       ],
       { cancelable: false }
     );
-  }
-
+  };
 
   return (
     <TouchableHighlight
+      onPress={() => onToggleTodo(id)}
       onLongPress={() => onLongPress(body, id)}
-      onPress={() => toggleComplete(id)}
       style={[styles.bg, { backgroundColor: bgStyle }]}
     >
       <View style={styles.container}>
@@ -50,7 +55,7 @@ const styles = StyleSheet.create({
   bg: {
     marginTop: 5,
     marginBottom: 5,
-    borderRadius: 10,
+    borderRadius: 10
   },
   container: {
     flex: 1,
@@ -59,8 +64,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row"
   },
-  textContainer: { 
-    flex: 2 
+  textContainer: {
+    flex: 2
   },
   text: {
     fontSize: 15,

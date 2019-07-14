@@ -45,7 +45,7 @@ function App() {
     const newTodo = {
       body: todoBody,
       status: "Active",
-      createdAt: new Date(),
+      createdAt: new Date().toUTCString(),
       uid: "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1"
     };
 
@@ -58,12 +58,10 @@ function App() {
   };
 
   onDeleteTodo = id => {
-    ref.current
-      .doc(id)
-      .delete()
+    ref.current.doc(id).delete();
   };
 
-  toggleComplete = id => {
+  onToggleTodo = id => {
     const todo = todos.find(todo => todo.id === id);
     todo.status = todo.status === "Active" ? "Done" : "Active";
     ref.current
@@ -106,7 +104,7 @@ function App() {
             renderItem={({ item, index }) => (
               <Todo
                 {...item}
-                toggleComplete={toggleComplete}
+                onToggleTodo={onToggleTodo}
                 index={index}
                 onDeleteTodo={onDeleteTodo}
               />
