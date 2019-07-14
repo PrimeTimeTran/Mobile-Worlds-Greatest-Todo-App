@@ -1,13 +1,13 @@
 import React from "react";
 import {
-  Alert,
   View,
   Text,
+  Alert,
   StyleSheet,
   TouchableHighlight
 } from "react-native";
 
-const Todo = ({ id, body, index, status, onToggleTodo, onDeleteTodo }) => {
+const Todo = ({ id, body, number, status, onToggleTodo, onDeleteTodo }) => {
   const isDone = status === "Done";
   const bgStyle = isDone ? "rgba(31, 58, 147, 0.6)" : "rgba(30, 130, 76, 0.6)";
   const textStyle = { textDecorationLine: isDone ? "line-through" : null };
@@ -38,7 +38,7 @@ const Todo = ({ id, body, index, status, onToggleTodo, onDeleteTodo }) => {
       <View style={styles.container}>
         <View style={styles.textContainer}>
           <Text style={[styles.text, textStyle]}>
-            {index + 1}: {body}
+            {number}: {body}
           </Text>
         </View>
         <View style={{ flex: 0.1 }}>

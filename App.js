@@ -6,8 +6,11 @@ import {
   FlatList,
   TextInput,
   StyleSheet,
+  AsyncStorage,
   ImageBackground,
   TouchableOpacity,
+  ActivityIndicator,
+  KeyboardAvoidingView,
   TouchableWithoutFeedback
 } from "react-native";
 
@@ -18,17 +21,24 @@ import { randomBackgroundImage } from "./src/utils";
 
 function App() {
   const [todos, setTodos] = useState([]);
+  const [email, setEmail] = useState("");
   const [todoBody, setTodoBody] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [password, setPassword] = useState(null);
   const ref = useRef(firebase.firestore().collection("todos"));
+  const [currentUser, setCurrentUser] = useState({ email: "" });
 
-  useEffect(() => {
-    const onCollectionUpdate = () => {
+  const setupUser = async () => {
+    const savedUser = await AsyncStorage.getItem("currentUser");
+    const signedInUser = await JSON.parse(savedUser)
+    if (signedInUser) {
+      setCurrentUser({ ...signedInUser });
       const query = ref.current
-        .where("uid", "==", "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1")
+        .where("uid", "==", signedInUser.uid)
         .orderBy("createdAt", "asc");
       query.get().then(querySnapshot => {
         let newTodos = [];
-        querySnapshot.forEach(function(doc) {
+        querySnapshot.forEach(doc => {
           const todo = {
             ...doc.data(),
             id: doc.id
@@ -37,31 +47,58 @@ function App() {
         });
         setTodos(newTodos);
       });
+    } else {
+      console.log("Not signed in");
+      setCurrentUser({ email: "" });
+    }
+  };
+
+  useEffect(() => {
+    setupUser();
+
+    const onCollectionUpdate = () => {
+      const query = ref.current
+        .where("uid", "==", currentUser.uid)
+        .orderBy("createdAt", "asc");
+      query.get().then(querySnapshot => {
+        let newTodos = [];
+        querySnapshot.forEach(doc => {
+          const todo = {
+            ...doc.data(),
+            id: doc.id
+          };
+          newTodos.push(todo);
+        });
+        setTodos(newTodos);
+      });
+      setLoading(false);
     };
     ref.current.onSnapshot(onCollectionUpdate);
   }, [todoBody]);
 
   const addTodo = () => {
+    setLoading(true);
     const newTodo = {
       body: todoBody,
       status: "Active",
       createdAt: new Date().toUTCString(),
-      uid: "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1"
+      uid: currentUser.uid
     };
 
     ref.current.add(newTodo).then(doc => {
       newTodo.id = doc.id;
     });
-
     setTodoBody("");
     Keyboard.dismiss;
   };
 
   onDeleteTodo = id => {
+    setLoading(true);
     ref.current.doc(id).delete();
   };
 
   onToggleTodo = id => {
+    setLoading(true);
     const todo = todos.find(todo => todo.id === id);
     todo.status = todo.status === "Active" ? "Done" : "Active";
     ref.current
@@ -75,11 +112,45 @@ function App() {
       });
   };
 
-  return (
-    <ImageBackground
-      style={styles.bg}
-      source={{ uri: randomBackgroundImage() }}
-    >
+  onSignIn = () => {
+    firebase
+      .auth()
+      .signInWithEmailAndPassword(email, password)
+      .then(user => {
+        const newUser = {
+          uid: user.user.uid,
+          email: user.user.email
+        }
+        setCurrentUser(newUser);
+        setEmail("");
+        setPassword("");
+        AsyncStorage.setItem("currentUser", JSON.stringify(newUser))
+      })
+      .catch(error => {
+        console.log("Account not found, creating a new one!");
+        createUserAccount();
+      });
+  };
+
+  const createUserAccount = () => {
+    firebase
+      .auth()
+      .createUserWithEmailAndPassword(email, password)
+      .then(user => {
+        setCurrentUser({
+          uid: user.user.uid,
+          email: user.user.email
+        });
+        setEmail("");
+        setPassword("");
+      })
+      .catch(error => {
+        console.log("Failed to create new account!");
+      });
+  };
+
+  renderTodos = () => {
+    return (
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.container}>
           <Text style={styles.header}>Todo List ({todos.length})</Text>
@@ -90,6 +161,7 @@ function App() {
             placeholderTextColor="lightgrey"
             onChangeText={text => setTodoBody(text)}
           />
+
           <TouchableOpacity
             onPress={addTodo}
             style={styles.submit}
@@ -97,6 +169,12 @@ function App() {
           >
             <Text style={styles.buttonText}>Submit</Text>
           </TouchableOpacity>
+          <ActivityIndicator
+            color="white"
+            size="large"
+            animating={loading}
+            style={{ marginTop: 10 }}
+          />
           <FlatList
             data={todos}
             style={styles.list}
@@ -104,14 +182,47 @@ function App() {
             renderItem={({ item, index }) => (
               <Todo
                 {...item}
+                number={index + 1}
                 onToggleTodo={onToggleTodo}
-                index={index}
                 onDeleteTodo={onDeleteTodo}
               />
             )}
           />
         </View>
       </TouchableWithoutFeedback>
+    );
+  };
+
+  renderSignin = () => {
+    return (
+      <View style={styles.authForm}>
+        <TextInput
+          value={email}
+          style={styles.formInput}
+          placeholder="johndoe@gmail.com"
+          onChangeText={text => setEmail(text)}
+        />
+        <TextInput
+          secureTextEntry
+          value={password}
+          placeholder="********"
+          style={styles.formInput}
+          onChangeText={text => setPassword(text)}
+        />
+        <TouchableOpacity onPress={onSignIn} style={styles.submit}>
+          <Text style={styles.buttonText}>Sign In</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  return (
+    <ImageBackground
+      style={styles.bg}
+      source={{ uri: randomBackgroundImage() }}
+    >
+      {currentUser.email !== "" && renderTodos()}
+      {currentUser.email === "" && renderSignin()}
     </ImageBackground>
   );
 }
@@ -123,14 +234,15 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     height: "100%",
-    backgroundColor: "black"
+    alignItems: "center",
+    justifyContent: "center",
   },
   container: {
     flex: 1,
     width: "95%",
     borderWidth: 1,
     borderRadius: 20,
-    marginTop: "40%",
+    marginTop: "25%",
     maxHeight: "60%",
     minHeight: "60%",
     paddingBottom: 10,
@@ -176,5 +288,27 @@ const styles = StyleSheet.create({
   list: {
     width: "90%",
     height: "90%"
+  },
+  authForm: {
+    flex: 1,
+    width: "90%",
+    height: "10%",
+    maxHeight: "40%",
+    borderRadius: 25,
+    alignSelf: "center",
+    alignItems: "center",
+    alignContent: "center",
+    justifyContent: "center",
+    backgroundColor: "white"
+  },
+  formInput: {
+    margin: 10,
+    height: 60,
+    padding: 10,
+    fontSize: 25,
+    width: "90%",
+    borderWidth: 1,
+    borderRadius: 10,
+    borderColor: 'grey',
   }
 });
