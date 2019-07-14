@@ -1,13 +1,32 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableHighlight } from "react-native";
+import { Alert, View, Text, StyleSheet, TouchableHighlight } from "react-native";
 
-const Todo = ({ id, body, index, status, toggleComplete }) => {
+const Todo = ({ id, body, index, status, toggleComplete, onDeleteTodo }) => {
   const isDone = status === "Done";
   const bgStyle = isDone ? "#12355B" : "green";
   const textStyle = { textDecorationLine: isDone ? "line-through" : null };
 
+  onLongPress = (body, id) => {
+    const prompt = `"${body}"`;
+    Alert.alert(
+      "Delete your todo?",
+      prompt,
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        { text: "OK", onPress: () => onDeleteTodo(id) }
+      ],
+      { cancelable: false }
+    );
+  }
+
+
   return (
     <TouchableHighlight
+      onLongPress={() => onLongPress(body, id)}
       onPress={() => toggleComplete(id)}
       style={[styles.bg, { backgroundColor: bgStyle }]}
     >

@@ -20,34 +20,29 @@ function App() {
   const [todoBody, setTodoBody] = useState("");
 
   useEffect(() => {
-
-    firebase.auth().onAuthStateChanged((user) => {
+    firebase.auth().onAuthStateChanged(user => {
       if (user) {
-        console.log('user')
+        console.log("user");
       } else {
-        console.log('no user')
+        console.log("no user");
       }
-    })
-    const todosRef = firebase
-      .firestore()
-      .collection("todos")
+    });
+    const todosRef = firebase.firestore().collection("todos");
 
     const query = todosRef
-            .where("uid", "==", "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1")
-            .orderBy("createdAt", "asc");
-    query
-      .get()
-      .then(querySnapshot => {
-        let newTodos = [];
-        querySnapshot.forEach(function(doc) {
-          const todo = {
-            ...doc.data(),
-            id: doc.id
-          };
-          newTodos.push(todo);
-        });
-        setTodos(newTodos);
+      .where("uid", "==", "JcaPj5OxdsXbQ7YRPLJ3Bo6IQ7r1")
+      .orderBy("createdAt", "asc");
+    query.get().then(querySnapshot => {
+      let newTodos = [];
+      querySnapshot.forEach(function(doc) {
+        const todo = {
+          ...doc.data(),
+          id: doc.id
+        };
+        newTodos.push(todo);
       });
+      setTodos(newTodos);
+    });
   }, [todoBody, todos]);
 
   const addTodo = async () => {
@@ -65,8 +60,21 @@ function App() {
       .set(newTodo);
     setTodoBody("");
 
-    const newTodos = todos.push(newTodo)
+    const newTodos = todos.push(newTodo);
     setTodos(newTodos);
+  };
+
+  onDeleteTodo = id => {
+    const db = firebase.firestore().collection("todos");
+    db.doc(id)
+      .delete()
+      .then(() => {
+        const newTodoList = todos.filter(todo => todo.id !== id);
+        setTodos(newTodoList);
+      })
+      .catch(error => {
+        console.error("Error removing document: ", error);
+      });
   };
 
   toggleComplete = id => {
@@ -93,30 +101,30 @@ function App() {
       }}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View style={styles.container}>
-        <Text style={styles.header}>Todo List ({todos.length})</Text>
-        <TextInput
-          value={todoBody}
-          style={styles.input}
-          placeholder={"Add Todo"}
-          onChangeText={text => setTodoBody(text)}
-        />
-        <TouchableOpacity
-          onPress={addTodo}
-          style={styles.submit}
-          disabled={!todoBody.length}
-        >
-          <Text style={styles.buttonText}>Submit</Text>
-        </TouchableOpacity>
-        <FlatList
-          data={todos}
-          style={styles.list}
-          keyExtractor={item => item.id}
-          renderItem={({ item, index }) => (
-            <Todo {...item} toggleComplete={toggleComplete} index={index} />
-          )}
-        />
-      </View>
+        <View style={styles.container}>
+          <Text style={styles.header}>Todo List ({todos.length})</Text>
+          <TextInput
+            value={todoBody}
+            style={styles.input}
+            placeholder={"Add Todo"}
+            onChangeText={text => setTodoBody(text)}
+          />
+          <TouchableOpacity
+            onPress={addTodo}
+            style={styles.submit}
+            disabled={!todoBody.length}
+          >
+            <Text style={styles.buttonText}>Submit</Text>
+          </TouchableOpacity>
+          <FlatList
+            data={todos}
+            style={styles.list}
+            keyExtractor={item => item.id}
+            renderItem={({ item, index }) => (
+              <Todo {...item} toggleComplete={toggleComplete} index={index} onDeleteTodo={onDeleteTodo} />
+            )}
+          />
+        </View>
       </TouchableWithoutFeedback>
     </ImageBackground>
   );
