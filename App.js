@@ -15,6 +15,7 @@ import {
 } from "react-native";
 
 import firebase from "react-native-firebase";
+import { Button } from 'react-native-elements'
 
 import Todo from "./src/components/Todo";
 import { randomBackgroundImage } from "./src/utils";
@@ -28,55 +29,53 @@ function App() {
   const ref = useRef(firebase.firestore().collection("todos"));
   const [currentUser, setCurrentUser] = useState({ email: "" });
 
-  const setupUser = async () => {
+  setupUser = async () => {
     const savedUser = await AsyncStorage.getItem("currentUser");
-    const signedInUser = await JSON.parse(savedUser)
+    const signedInUser = await JSON.parse(savedUser);
     if (signedInUser) {
+      console.log('signedInUsersignedInUser', signedInUser)
       setCurrentUser({ ...signedInUser });
       const query = ref.current
         .where("uid", "==", signedInUser.uid)
         .orderBy("createdAt", "asc");
       query.get().then(querySnapshot => {
-        let newTodos = [];
-        querySnapshot.forEach(doc => {
-          const todo = {
-            ...doc.data(),
-            id: doc.id
-          };
-          newTodos.push(todo);
-        });
-        setTodos(newTodos);
+        updateTodos(querySnapshot);
       });
     } else {
       console.log("Not signed in");
-      setCurrentUser({ email: "" });
     }
+  };
+
+  updateTodos = querySnapshot => {
+    let newTodos = [];
+    console.log('updateTodosupdateTodos', )
+    querySnapshot.forEach(doc => {
+      console.log('currentUser.uid === doc.data().uid', currentUser.uid === doc.data().uid)
+      if (currentUser.uid === doc.data().uid) {
+        const todo = {
+          ...doc.data(),
+          id: doc.id
+        };
+        newTodos.push(todo);
+      }
+    });
+    newTodos = newTodos.sort((a, b) => {
+      return new Date(a.createdAt) - new Date(b.createdAt);
+    });
+    setTodos(newTodos);
   };
 
   useEffect(() => {
     setupUser();
 
-    const onCollectionUpdate = () => {
-      const query = ref.current
-        .where("uid", "==", currentUser.uid)
-        .orderBy("createdAt", "asc");
-      query.get().then(querySnapshot => {
-        let newTodos = [];
-        querySnapshot.forEach(doc => {
-          const todo = {
-            ...doc.data(),
-            id: doc.id
-          };
-          newTodos.push(todo);
-        });
-        setTodos(newTodos);
-      });
+    const onCollectionUpdate = querySnapshot => {
+      updateTodos(querySnapshot);
       setLoading(false);
     };
     ref.current.onSnapshot(onCollectionUpdate);
-  }, [todoBody]);
+  }, []);
 
-  const addTodo = () => {
+  addTodo = () => {
     setLoading(true);
     const newTodo = {
       body: todoBody,
@@ -87,9 +86,9 @@ function App() {
 
     ref.current.add(newTodo).then(doc => {
       newTodo.id = doc.id;
+      Keyboard.dismiss();
     });
     setTodoBody("");
-    Keyboard.dismiss;
   };
 
   onDeleteTodo = id => {
@@ -104,12 +103,13 @@ function App() {
     ref.current
       .doc(id)
       .set(todo)
-      .then(() => {
-        console.log("success");
+      .then(go => {
+        console.log("Success toggling");
       })
       .catch(error => {
-        console.log("failure");
+        console.log("Failure toggling");
       });
+    setLoading(false);
   };
 
   onSignIn = () => {
@@ -120,17 +120,37 @@ function App() {
         const newUser = {
           uid: user.user.uid,
           email: user.user.email
-        }
+        };
         setCurrentUser(newUser);
         setEmail("");
         setPassword("");
-        AsyncStorage.setItem("currentUser", JSON.stringify(newUser))
+        AsyncStorage.setItem("currentUser", JSON.stringify(newUser));
       })
       .catch(error => {
         console.log("Account not found, creating a new one!");
         createUserAccount();
       });
   };
+
+  const onSignOut = () => {
+    try {
+      firebase
+        .auth()
+        .signOut()
+        .then(() => {
+            console.log("Signed Out");
+            setCurrentUser({ uid: '' })
+            setTodos([])
+          },
+          error => {
+            console.error("Sign Out Error", error);
+          }
+        );
+    } catch (error) {
+      console.log('Error: ', error)
+    }
+    
+  }
 
   const createUserAccount = () => {
     firebase
@@ -152,29 +172,24 @@ function App() {
   renderTodos = () => {
     return (
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={styles.container}>
+        <View style={styles.todoContainer}>
           <Text style={styles.header}>Todo List ({todos.length})</Text>
           <TextInput
             value={todoBody}
             style={styles.input}
-            placeholder="Add Todo"
+            placeholder={currentUser.email}
+            onSubmitEditing={addTodo}
             placeholderTextColor="lightgrey"
             onChangeText={text => setTodoBody(text)}
           />
-
           <TouchableOpacity
             onPress={addTodo}
             style={styles.submit}
             disabled={!todoBody.length}
           >
+            {loading && <ActivityIndicator color="white" loading />}
             <Text style={styles.buttonText}>Submit</Text>
           </TouchableOpacity>
-          <ActivityIndicator
-            color="white"
-            size="large"
-            animating={loading}
-            style={{ marginTop: 10 }}
-          />
           <FlatList
             data={todos}
             style={styles.list}
@@ -188,7 +203,12 @@ function App() {
               />
             )}
           />
+          <Button 
+            title="Sign out"
+            onPress={onSignOut}
+          />
         </View>
+        
       </TouchableWithoutFeedback>
     );
   };
@@ -221,8 +241,13 @@ function App() {
       style={styles.bg}
       source={{ uri: randomBackgroundImage() }}
     >
-      {currentUser.email !== "" && renderTodos()}
-      {currentUser.email === "" && renderSignin()}
+      <KeyboardAvoidingView
+        behavior="position"
+        style={styles.avoidingContainer}
+      >
+        {currentUser.email !== "" && renderTodos()}
+        {currentUser.email === "" && renderSignin()}
+      </KeyboardAvoidingView>
     </ImageBackground>
   );
 }
@@ -235,26 +260,11 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     alignItems: "center",
-    justifyContent: "center",
-  },
-  container: {
-    flex: 1,
-    width: "95%",
-    borderWidth: 1,
-    borderRadius: 20,
-    marginTop: "25%",
-    maxHeight: "60%",
-    minHeight: "60%",
-    paddingBottom: 10,
-    alignSelf: "center",
-    alignItems: "center",
-    borderColor: "white",
-    justifyContent: "center",
-    backgroundColor: "rgba(52, 52, 52, 0.4)"
+    justifyContent: "center"
   },
   header: {
     fontSize: 25,
-    marginTop: 50,
+    marginTop: 10,
     color: "white",
     fontWeight: "bold"
   },
@@ -275,19 +285,22 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderRadius: 10,
     marginBottom: 10,
+    flexDirection: "row",
     alignItems: "center",
     backgroundColor: "red",
-    justifyContent: "center",
+    justifyContent: "space-around",
     backgroundColor: "#DB504A"
   },
   buttonText: {
-    fontSize: 20,
+    fontSize: 15,
     color: "white",
     fontWeight: "bold"
   },
   list: {
-    width: "90%",
-    height: "90%"
+    flex: 1,
+    width: "95%",
+    minHeight: "10%",
+    maxHeight: "200%"
   },
   authForm: {
     flex: 1,
@@ -309,6 +322,32 @@ const styles = StyleSheet.create({
     width: "90%",
     borderWidth: 1,
     borderRadius: 10,
-    borderColor: 'grey',
+    color: "white",
+    borderColor: "grey"
+  },
+  avoidingContainer: {
+    flex: 1,
+    width: "95%",
+    minWidth: "95%",
+    maxHeight: "60%",
+    minHeight: "60%",
+    paddingBottom: 20,
+    alignSelf: "center",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  todoContainer: {
+    flex: 1,
+    borderWidth: 1,
+    paddingBottom: 5,
+    borderRadius: 20,
+    minWidth: "100%",
+    alignItems: "center",
+    borderColor: "white",
+    justifyContent: "center",
+    backgroundColor: "rgba(52, 52, 52, 0.4)"
+  },
+  button: {
+    backgroundColor: "green"
   }
 });

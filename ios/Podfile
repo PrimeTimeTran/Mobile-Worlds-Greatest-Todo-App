@@ -25,6 +25,24 @@ target 'rnTodoList' do
 
   pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
 
+  pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
+
+  pod "yoga", :path => "../node_modules/react-native/ReactCommon/yoga"
+  pod 'React', :path => '../node_modules/react-native', :subspecs => [
+    'Core',
+    'DevSupport',
+    'RCTNetwork',
+    'RCTWebSocket'
+  ]
+
+  pod 'BVLinearGradient', :path => '../node_modules/react-native-linear-gradient'
+  post_install do |installer|
+    installer.pods_project.targets.each do |target|
+      if target.name == "React"
+        target.remove_from_project
+      end
+    end
+  end
 end
 
 target 'rnTodoList-tvOS' do
