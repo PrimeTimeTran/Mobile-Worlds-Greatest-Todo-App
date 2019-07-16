@@ -15,7 +15,7 @@ import {
 } from "react-native";
 
 import firebase from "react-native-firebase";
-import { Button } from 'react-native-elements'
+import { Button } from "react-native-elements";
 
 import Todo from "./src/components/Todo";
 import { randomBackgroundImage } from "./src/utils";
@@ -33,7 +33,6 @@ function App() {
     const savedUser = await AsyncStorage.getItem("currentUser");
     const signedInUser = await JSON.parse(savedUser);
     if (signedInUser) {
-      console.log('signedInUsersignedInUser', signedInUser)
       setCurrentUser({ ...signedInUser });
       const query = ref.current
         .where("uid", "==", signedInUser.uid)
@@ -48,9 +47,7 @@ function App() {
 
   updateTodos = querySnapshot => {
     let newTodos = [];
-    console.log('updateTodosupdateTodos', )
     querySnapshot.forEach(doc => {
-      console.log('currentUser.uid === doc.data().uid', currentUser.uid === doc.data().uid)
       if (currentUser.uid === doc.data().uid) {
         const todo = {
           ...doc.data(),
@@ -80,8 +77,8 @@ function App() {
     const newTodo = {
       body: todoBody,
       status: "Active",
+      uid: currentUser.uid,
       createdAt: new Date().toUTCString(),
-      uid: currentUser.uid
     };
 
     ref.current.add(newTodo).then(doc => {
@@ -137,20 +134,20 @@ function App() {
       firebase
         .auth()
         .signOut()
-        .then(() => {
+        .then(
+          () => {
             console.log("Signed Out");
-            setCurrentUser({ uid: '' })
-            setTodos([])
+            setCurrentUser({ uid: "" });
+            setTodos([]);
           },
           error => {
             console.error("Sign Out Error", error);
           }
         );
     } catch (error) {
-      console.log('Error: ', error)
+      console.log("Error: ", error);
     }
-    
-  }
+  };
 
   const createUserAccount = () => {
     firebase
@@ -203,12 +200,8 @@ function App() {
               />
             )}
           />
-          <Button 
-            title="Sign out"
-            onPress={onSignOut}
-          />
+          <Button title="Sign out" onPress={onSignOut} />
         </View>
-        
       </TouchableWithoutFeedback>
     );
   };
