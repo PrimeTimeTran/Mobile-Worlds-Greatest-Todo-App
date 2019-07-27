@@ -5,6 +5,7 @@ import {
   Keyboard,
   FlatList,
   TextInput,
+  Dimensions,
   StyleSheet,
   AsyncStorage,
   ImageBackground,
@@ -19,6 +20,8 @@ import { Button } from "react-native-elements";
 
 import Todo from "./src/components/Todo";
 import { randomBackgroundImage } from "./src/utils";
+
+const { width, height } = Dimensions.get('window');
 
 function App() {
   const [todos, setTodos] = useState([]);
@@ -78,7 +81,7 @@ function App() {
       body: todoBody,
       status: "Active",
       uid: currentUser.uid,
-      createdAt: new Date().toUTCString(),
+      createdAt: new Date().toUTCString()
     };
 
     ref.current.add(newTodo).then(doc => {
@@ -129,8 +132,9 @@ function App() {
       });
   };
 
-  const onSignOut = () => {
+  const onSignOut = async () => {
     try {
+      await AsyncStorage.removeItem("currentUser");
       firebase
         .auth()
         .signOut()
@@ -168,9 +172,13 @@ function App() {
 
   renderTodos = () => {
     return (
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <TouchableWithoutFeedback
+        style={styles.bg}
+        accessible={false}
+        onPress={Keyboard.dismiss}
+      >
         <View style={styles.todoContainer}>
-          <Text style={styles.header}>Todo List ({todos.length})</Text>
+          <Text style={styles.header}>Todos List ({todos.length})</Text>
           <TextInput
             value={todoBody}
             style={styles.input}
@@ -200,7 +208,11 @@ function App() {
               />
             )}
           />
-          <Button title="Sign out" onPress={onSignOut} />
+          <Button
+            title="Sign out"
+            onPress={onSignOut}
+            style={{ marginTop: 10 }}
+          />
         </View>
       </TouchableWithoutFeedback>
     );
@@ -251,9 +263,10 @@ const styles = StyleSheet.create({
   bg: {
     flex: 1,
     width: "100%",
-    height: "100%",
+    height: height,
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+    backgroundColor: "black"
   },
   header: {
     fontSize: 25,
@@ -267,6 +280,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: "white",
     borderWidth: 1,
+    minWidth: "90%",
     borderRadius: 10,
     fontWeight: "bold",
     borderColor: "white"
@@ -281,8 +295,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "red",
-    justifyContent: "space-around",
-    backgroundColor: "#DB504A"
+    backgroundColor: "#DB504A",
+    justifyContent: "space-around"
   },
   buttonText: {
     fontSize: 15,
@@ -291,31 +305,31 @@ const styles = StyleSheet.create({
   },
   list: {
     flex: 1,
-    width: "95%",
-    minHeight: "10%",
-    maxHeight: "200%"
+    minWidth: "95%",
+    maxHeight: "200%",
   },
   authForm: {
     flex: 1,
     width: "90%",
     height: "10%",
+    minWidth: "90%",
     maxHeight: "40%",
     borderRadius: 25,
     alignSelf: "center",
     alignItems: "center",
     alignContent: "center",
-    justifyContent: "center",
-    backgroundColor: "white"
+    justifyContent: "center"
   },
   formInput: {
     margin: 10,
     height: 60,
-    padding: 10,
     fontSize: 25,
     width: "90%",
     borderWidth: 1,
-    borderRadius: 10,
     color: "white",
+    minWidth: "90%",
+    padding: 5,
+    borderRadius: 10,
     borderColor: "grey"
   },
   avoidingContainer: {
@@ -331,14 +345,17 @@ const styles = StyleSheet.create({
   },
   todoContainer: {
     flex: 1,
+    width: "100%",
     borderWidth: 1,
     paddingBottom: 5,
     borderRadius: 20,
-    minWidth: "100%",
+    paddingHorizontal: 5,
     alignItems: "center",
     borderColor: "white",
     justifyContent: "center",
-    backgroundColor: "rgba(52, 52, 52, 0.4)"
+    // backgroundColor: "rgba(52, 52, 52, 0.4)"
+    backgroundColor: "red",
+    maxHeight: height * 0.8
   },
   button: {
     backgroundColor: "green"
