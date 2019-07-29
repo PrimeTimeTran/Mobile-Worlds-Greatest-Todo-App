@@ -403,6 +403,7 @@
 		F2C89EE2F4607D097253AE26 /* Pods-rnTodoList-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-rnTodoList-tvOSTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-rnTodoList-tvOSTests/Pods-rnTodoList-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
 		F75B515D735B4D69B20A7ED6 /* Entypo.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Entypo.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Entypo.ttf"; sourceTree = "<group>"; };
 		FC017DB6CA2043A5BAA652A3 /* Ionicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Ionicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
+		FD04930622EE171200D0AA7D /* rnTodoList.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = rnTodoList.entitlements; path = rnTodoList/rnTodoList.entitlements; sourceTree = "<group>"; };
 		FD1E3C7D22D3135A00199175 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -561,6 +562,7 @@
 		13B07FAE1A68108700A75B9A /* rnTodoList */ = {
 			isa = PBXGroup;
 			children = (
+				FD04930622EE171200D0AA7D /* rnTodoList.entitlements */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
@@ -826,6 +828,14 @@
 					};
 					13B07F861A680F5B00A75B9A = {
 						DevelopmentTeam = PLL9762857;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+							com.apple.Push = {
+								enabled = 1;
+							};
+						};
 					};
 					2D02E47A1E0B4A5D006451C7 = {
 						CreatedOnToolsVersion = 8.2.1;
@@ -1504,6 +1514,7 @@
 			baseConfigurationReference = D8E13BB553BB18534EEFFDDE /* Pods-rnTodoList.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = rnTodoList/rnTodoList.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = PLL9762857;
@@ -1529,6 +1540,7 @@
 			baseConfigurationReference = B2121FE3F0701D7C33F213D3 /* Pods-rnTodoList.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = rnTodoList/rnTodoList.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PLL9762857;
 				HEADER_SEARCH_PATHS = (
