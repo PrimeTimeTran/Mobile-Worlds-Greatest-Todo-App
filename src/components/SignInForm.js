@@ -16,9 +16,9 @@ const SignInForm = ({ onSignIn }) => {
       <View style={styles.authForm}>
         <TextInput
           value={email}
+          onChangeText={setEmail}
           style={styles.formInput}
           placeholder="johndoe@gmail.com"
-          onChangeText={setEmail}
         />
         <TextInput
           secureTextEntry

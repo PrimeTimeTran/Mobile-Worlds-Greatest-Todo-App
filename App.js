@@ -11,12 +11,26 @@ import firebase from "react-native-firebase";
 
 import Todos from "./src/components/Todos";
 import SignInForm from "./src/components/SignInForm";
-import { randomBackgroundImage } from "./src/utils";
 
-// console.disableYellowBox = true;
+console.disableYellowBox = true;
 
 const { height } = Dimensions.get("window");
 const tracker = firebase.analytics();
+
+const bgs = [
+  require("./assets/1.jpg"),
+  require("./assets/2.jpg"),
+  require("./assets/3.jpg"),
+  require("./assets/4.jpg"),
+  require("./assets/5.jpg"),
+  require("./assets/6.jpg"),
+  require("./assets/7.jpg"),
+  require("./assets/8.jpg"),
+  require("./assets/9.jpg"),
+  require("./assets/10.jpg")
+];
+
+const bg = bgs[Math.floor(Math.random() * bgs.length)];
 
 function App() {
   const [todos, setTodos] = useState([]);
@@ -68,7 +82,6 @@ function App() {
     if (!fcmToken) {
       fcmToken = await firebase.messaging().getToken();
       if (fcmToken) {
-        // user has a device token
         await AsyncStorage.setItem("fcmToken", fcmToken);
       }
     }
@@ -77,10 +90,8 @@ function App() {
   requestPermission = async () => {
     try {
       await firebase.messaging().requestPermission();
-      // User has authorised
       this.getToken();
     } catch (error) {
-      // User has rejected permissions
       console.warn("permission rejected");
     }
   };
@@ -154,12 +165,8 @@ function App() {
       });
   };
 
-
   return (
-    <ImageBackground
-      style={styles.bg}
-      source={{ uri: randomBackgroundImage() }}
-    >
+    <ImageBackground style={styles.bg} source={bg}>
       <KeyboardAvoidingView
         behavior="position"
         style={styles.avoidingContainer}
